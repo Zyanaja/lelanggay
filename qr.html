@@ -1,0 +1,135 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Pelanggaran Siswa</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #e0eafc, #cfdef3);
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .form {
+      max-width: 600px;
+      margin: 20px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Form Pelanggaran Siswa</h1>
+  <div class="form">
+    <input type="text" id="nama" placeholder="Nama">
+    <input type="text" id="kelas" placeholder="Kelas">
+    <input type="text" id="jurusan" placeholder="Jurusan"><select id="pelanggaran">
+  <option value="kr">Kerudung</option>
+  <option value="k">Kuku</option>
+  <option value="kk">Kaos Kaki</option>
+  <option value="sr">Seragam</option>
+  <option value="s">Sepatu</option>
+  <option value="a-dasi">Dasi</option>
+  <option value="a-topi">Topi</option>
+  <option value="a-sabuk">Sabuk</option>
+</select>
+<button onclick="tambahData()">Tambah Pelanggaran</button>
+<br>
+<canvas id="qrcode" style="display: none; margin-top:20px;"></canvas>
+
+  </div>  <table id="dataTable">
+    <thead>
+      <tr>
+        <th>Nama</th>
+        <th>Kelas</th>
+        <th>Jurusan</th>
+        <th>Pelanggaran</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <div style="text-align:center; margin-top:20px">
+    <button onclick="unduhExcel()">Unduh Data ke Excel</button>
+  </div>  <div class="footer">Created by Alfiyan</div>  <script>
+    const data = [];
+
+    function tambahData() {
+      const nama = document.getElementById("nama").value;
+      const kelas = document.getElementById("kelas").value;
+      const jurusan = document.getElementById("jurusan").value;
+      const pelanggaran = document.getElementById("pelanggaran").value;
+
+      if (!nama || !kelas || !jurusan) {
+        alert("Lengkapi semua data!");
+        return;
+      }
+
+      const newData = { nama, kelas, jurusan, pelanggaran };
+      data.push(newData);
+      updateTable();
+      generateQR();
+      document.getElementById("nama").value = "";
+      document.getElementById("kelas").value = "";
+      document.getElementById("jurusan").value = "";
+    }
+
+    function updateTable() {
+      const tbody = document.querySelector("#dataTable tbody");
+      tbody.innerHTML = "";
+      data.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${item.nama}</td><td>${item.kelas}</td><td>${item.jurusan}</td><td>${item.pelanggaran}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function generateQR() {
+      const canvas = document.getElementById("qrcode");
+      canvas.style.display = 'block';
+      const jsonData = JSON.stringify(data);
+      QRCode.toCanvas(canvas, jsonData, function (error) {
+        if (error) console.error(error);
+      });
+    }
+
+    function unduhExcel() {
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(data);
+      XLSX.utils.book_append_sheet(wb, ws, "DataPelanggaran");
+      XLSX.writeFile(wb, "data_pelanggaran.xlsx");
+    }
+  </script></body>
+</html>
